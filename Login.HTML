@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión - Autenticación Segura</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background: radial-gradient(circle at top left, #111827, #030712);
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-200 flex items-center justify-center p-4">
+
+  <div class="glass-card w-full max-w-md rounded-2xl p-6 sm:p-10">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-extrabold tracking-tight text-white mb-2">Bienvenido</h1>
+      <p class="text-slate-400 text-sm">Ingresa tus credenciales para acceder a la plataforma</p>
+    </div>
+
+    <div id="alertBox" class="hidden mb-6 p-4 rounded-xl text-sm font-medium transition-all duration-300"></div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5" novalidate>
+      
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Correo Electrónico o Usuario</label>
+        <input type="text" id="identifier" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="correo@dominio.com">
+      </div>
+
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Contraseña</label>
+          <!-- Redirige a la interfaz de recuperación de contraseña -->
+          <button type="button" onclick="irARecuperar()" class="text-xs text-indigo-400 hover:underline">¿Olvidaste tu contraseña?</button>
+        </div>
+        <div class="relative">
+          <input type="password" id="password" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 pr-10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="••••••••">
+          <button type="button" onclick="togglePass('password', 'iconPass')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+            <i id="iconPass" class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button id="btnLogin" type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all duration-200 mt-2">
+        Iniciar Sesión
+      </button>
+
+      <p class="text-center text-xs text-slate-400 mt-6">
+        ¿No tienes una cuenta? <a href="registro.html" class="text-indigo-400 hover:underline">Regístrate aquí</a>
+      </p>
+    </form>
+  </div>
+
+  <script>
+    let intentosFallidos = 0;
+    let tiempoBloqueo = null;
+
+    function togglePass(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    }
+
+    function mostrarAlerta(mensaje, tipo = 'error') {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.innerText = mensaje;
+      if (tipo === 'error') {
+        alertBox.className = 'mb-6 p-4 rounded-xl text-sm font-medium bg-rose-500/20 text-rose-300 border border-rose-500/30';
+      } else {
+        alertBox.className = 'mb-6 p-4 rounded-xl text-sm font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+      }
+      alertBox.classList.remove('hidden');
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+
+      if (tiempoBloqueo && Date.now() < tiempoBloqueo) {
+        const segundosRestantes = Math.ceil((tiempoBloqueo - Date.now()) / 1000);
+        mostrarAlerta(`Demasiados intentos fallidos. Por seguridad, espera ${segundosRestantes} segundos.`);
+        return;
+      }
+
+      const identifier = document.getElementById('identifier').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+
+      if (!identifier || !password) {
+        mostrarAlerta('Por favor completa todos los campos obligatorios.');
+        return;
+      }
+
+      const storedUser = JSON.parse(localStorage.getItem('registered_user'));
+
+      if (storedUser && (identifier === storedUser.correo || identifier === storedUser.usuario) && password === storedUser.password) {
+        intentosFallidos = 0;
+        localStorage.setItem('active_session', JSON.stringify(storedUser));
+        mostrarAlerta('Inicio de sesión correcto. Redirigiendo...', 'exito');
+        setTimeout(() => {
+          window.location.href = 'bienvenida.html';
+        }, 1000);
+      } else {
+        intentosFallidos++;
+        if (intentosFallidos >= 5) {
+          tiempoBloqueo = Date.now() + 60000;
+          mostrarAlerta('Has superado el límite de intentos permitidos. Acceso bloqueado temporalmente por 1 minuto.');
+          intentosFallidos = 0;
+        } else {
+          mostrarAlerta('Correo o contraseña incorrectos.');
+        }
+      }
+    }
+
+    function irARecuperar() {
+      window.location.href = 'recuperar.html';
+    }
+  </script>
+</body>
+</html>

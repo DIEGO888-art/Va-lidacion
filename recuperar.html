@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar Contraseña - Correo Real</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SDK oficial de EmailJS para enviar correos desde el navegador -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function() {
+      // Inicializa EmailJS con tu Public Key
+      emailjs.init("GMNH-Sq2fhlD6G3-9"); // <--- PEGA AQUÍ TU PUBLIC KEY DE EMAILJS
+    })();
+  </script>
+  <style>
+    body {
+      background: radial-gradient(circle at top left, #111827, #030712);
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-200 flex items-center justify-center p-4">
+
+  <div class="glass-card w-full max-w-md rounded-2xl p-6 sm:p-10">
+    <div class="text-center mb-8">
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">Recuperar Contraseña</h1>
+      <p id="subTitle" class="text-slate-400 text-sm">Ingresa tu correo para recibir el código de verificación real</p>
+    </div>
+
+    <div id="alertBox" class="hidden mb-6 p-4 rounded-xl text-sm font-medium transition-all duration-300"></div>
+
+    <!-- PASO 1: Solicitar Correo -->
+    <div id="step1Container">
+      <form onsubmit="enviarCorreoReal(event)" class="space-y-5">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Correo Electrónico</label>
+          <input type="email" id="recCorreo" onkeydown="prevenirEspacios(event)" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="nombre@dominio.com" required>
+        </div>
+
+        <button type="submit" id="btnEnviar" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all duration-200">
+          Enviar código al correo
+        </button>
+      </form>
+    </div>
+
+    <!-- PASO 2: Ingresar Código de 6 Dígitos -->
+    <div id="step2Container" class="hidden">
+      <form onsubmit="verificarCodigo(event)" class="space-y-5">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Código de 6 dígitos</label>
+          <input type="text" id="codigoIngresado" maxlength="6" onkeydown="prevenirEspacios(event)" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-3 text-white text-center text-2xl tracking-widest placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="------" required>
+          <p class="text-slate-400 text-xs mt-2 text-center">Revisa tu bandeja de entrada real. El código expira en 30 minutos.</p>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg transition-all duration-200">
+          Verificar código
+        </button>
+      </form>
+    </div>
+
+    <!-- PASO 3: Cambiar Contraseña -->
+    <div id="step3Container" class="hidden">
+      <form onsubmit="cambiarPassword(event)" class="space-y-5">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Nueva Contraseña (8-12 car.)</label>
+          <div class="relative">
+            <input type="password" id="nuevoPassword" onkeydown="prevenirEspacios(event)" oninput="evaluarPassword()" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 pr-10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="••••••••">
+            <button type="button" onclick="togglePass('nuevoPassword', 'iconPass1')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+              <i id="iconPass1" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <p id="err-password" class="text-rose-400 text-xs mt-1 hidden"></p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Confirmar Nueva Contraseña</label>
+          <div class="relative">
+            <input type="password" id="confirmNuevoPassword" onkeydown="prevenirEspacios(event)" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 pr-10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="••••••••">
+            <button type="button" onclick="togglePass('confirmNuevoPassword', 'iconPass2')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+              <i id="iconPass2" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <p id="err-confirmPassword" class="text-rose-400 text-xs mt-1 hidden"></p>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg transition-all duration-200">
+          Actualizar Contraseña
+        </button>
+      </form>
+    </div>
+
+    <p class="text-center text-xs text-slate-400 mt-6">
+      <a href="login.html" class="text-indigo-400 hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i> Volver al inicio de sesión</a>
+    </p>
+  </div>
+
+  <script>
+    function prevenirEspacios(e) {
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+      }
+    }
+
+    function togglePass(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    }
+
+    function mostrarAlerta(mensaje, tipo = 'error') {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.innerText = mensaje;
+      if (tipo === 'error') {
+        alertBox.className = 'mb-6 p-4 rounded-xl text-sm font-medium bg-rose-500/20 text-rose-300 border border-rose-500/30';
+      } else {
+        alertBox.className = 'mb-6 p-4 rounded-xl text-sm font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+      }
+      alertBox.classList.remove('hidden');
+    }
+
+    // ENVIAR EL CORREO REAL USANDO EMAILJS (Sin Node.js)
+    function enviarCorreoReal(e) {
+      e.preventDefault();
+      const correoInput = document.getElementById('recCorreo').value.trim().toLowerCase();
+      const storedUser = JSON.parse(localStorage.getItem('registered_user'));
+
+      if (!storedUser || storedUser.correo !== correoInput) {
+        // Por seguridad NIST, mostramos el mismo mensaje genérico aunque el correo no exista
+        mostrarAlerta('Si el correo está registrado, recibirás un código de verificación.', 'exito');
+        setTimeout(() => {
+          document.getElementById('step1Container').classList.add('hidden');
+          document.getElementById('step2Container').classList.remove('hidden');
+          document.getElementById('subTitle').innerText = 'Ingresa el código de 6 dígitos';
+          document.getElementById('alertBox').classList.add('hidden');
+        }, 3000);
+        return;
+      }
+
+      // Generar código de 6 dígitos
+      const codigoAleatorio = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      const datosRecuperacion = {
+        correo: storedUser.correo,
+        codigo: codigoAleatorio,
+        expira: Date.now() + (30 * 60 * 1000)
+      };
+      localStorage.setItem('reset_data', JSON.stringify(datosRecuperacion));
+
+      const btn = document.getElementById('btnEnviar');
+      btn.innerText = 'Enviando correo real...';
+      btn.disabled = true;
+
+      // Parámetros que se inyectan en tu plantilla de EmailJS
+      const templateParams = {
+        to_email: correoInput,
+        codigo: codigoAleatorio
+      };
+
+      // Llamada directa a EmailJS desde el navegador
+      emailjs.send('service_nw0e32v', 'template_of25h6b', templateParams)
+        .then(function(response) {
+            mostrarAlerta('¡Correo enviado con éxito! Revisa tu bandeja de entrada real.', 'exito');
+            setTimeout(() => {
+              document.getElementById('step1Container').classList.add('hidden');
+              document.getElementById('step2Container').classList.remove('hidden');
+              document.getElementById('subTitle').innerText = 'Ingresa el código de 6 dígitos recibido';
+              document.getElementById('alertBox').classList.add('hidden');
+            }, 2500);
+        }, function(error) {
+            console.error('FAILED...', error);
+            mostrarAlerta('Error al enviar el correo. Verifica tu configuración de EmailJS.');
+            btn.innerText = 'Enviar código al correo';
+            btn.disabled = false;
+        });
+    }
+
+    function verificarCodigo(e) {
+      e.preventDefault();
+      const ingreso = document.getElementById('codigoIngresado').value.trim();
+      const datos = JSON.parse(localStorage.getItem('reset_data'));
+
+      if (!datos || Date.now() > datos.expira) {
+        mostrarAlerta('El código ha expirado o no es válido.');
+        return;
+      }
+
+      if (ingreso === datos.codigo) {
+        document.getElementById('step2Container').classList.add('hidden');
+        document.getElementById('step3Container').classList.remove('hidden');
+        document.getElementById('subTitle').innerText = 'Crea tu nueva contraseña segura';
+        document.getElementById('alertBox').classList.add('hidden');
+      } else {
+        mostrarAlerta('Código incorrecto. Verifica los 6 dígitos.');
+      }
+    }
+
+    function evaluarPassword() {
+      const pwd = document.getElementById('nuevoPassword').value;
+      const contieneProhibidos = /[<>'\\&]/.test(pwd);
+      const tieneEspecialValido = /[!@#$%^&*()_+\-=\[\]{};:,./?]/.test(pwd);
+      const errEl = document.getElementById('err-password');
+
+      if (contieneProhibidos) {
+        errEl.innerText = 'Caracteres prohibidos (<> \' \\ &)';
+        errEl.classList.remove('hidden');
+        return false;
+      }
+      if (pwd.length < 8 || pwd.length > 12) {
+        errEl.innerText = 'La longitud debe ser de 8 a 12 caracteres';
+        errEl.classList.remove('hidden');
+        return false;
+      }
+      if (!tieneEspecialValido) {
+        errEl.innerText = 'Debe incluir al menos un carácter especial válido';
+        errEl.classList.remove('hidden');
+        return false;
+      }
+      errEl.classList.add('hidden');
+      return true;
+    }
+
+    function cambiarPassword(e) {
+      e.preventDefault();
+      const nuevoPassword = document.getElementById('nuevoPassword').value;
+      const confirmNuevoPassword = document.getElementById('confirmNuevoPassword').value;
+      const errConfirm = document.getElementById('err-confirmPassword');
+
+      errConfirm.classList.add('hidden');
+
+      if (!evaluarPassword()) return;
+
+      if (nuevoPassword !== confirmNuevoPassword) {
+        errConfirm.innerText = 'Las contraseñas no coinciden';
+        errConfirm.classList.remove('hidden');
+        return;
+      }
+
+      let storedUser = JSON.parse(localStorage.getItem('registered_user'));
+      const datos = JSON.parse(localStorage.getItem('reset_data'));
+
+      if (storedUser && datos && storedUser.correo === datos.correo) {
+        storedUser.password = nuevoPassword;
+        localStorage.setItem('registered_user', JSON.stringify(storedUser));
+        localStorage.removeItem('reset_data');
+
+        mostrarAlerta('¡Contraseña actualizada con éxito! Redirigiendo al login...', 'exito');
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1500);
+      } else {
+        mostrarAlerta('Error de sesión o código inválido.');
+      }
+    }
+  </script>
+</body>
+</html>

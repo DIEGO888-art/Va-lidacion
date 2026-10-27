@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenida al Sistema</title>
+  <!-- Importación de librerías de estilos y componentes gráficos -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Estilos visuales de fondo y tarjeta central sofisticada */
+    body {
+      background: radial-gradient(circle at top left, #111827, #030712);
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-200 flex items-center justify-center p-4">
+
+  <!-- Tarjeta contenedor de bienvenida minimalista y elegante -->
+  <div class="glass-card w-full max-w-lg rounded-2xl p-8 sm:p-12 text-center">
+    
+    <!-- Elemento visual: Icono de usuario autenticado de forma exitosa -->
+    <div class="w-20 h-20 bg-indigo-600/20 border border-indigo-500/30 rounded-full flex items-center justify-center mx-auto mb-6 text-indigo-400 text-3xl">
+      <i class="fa-solid fa-user-check"></i>
+    </div>
+
+    <!-- Mensaje dinámico que integra el nombre o alias del usuario activo -->
+    <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-2">
+      ¡Bienvenido, <span id="userName" class="text-indigo-400">Usuario</span>!
+    </h1>
+    <p class="text-slate-400 text-sm mb-8">Has superado la autenticación e ingresado correctamente al sistema.</p>
+
+    <!-- Botón interactivo para cerrar la sesión actual de usuario -->
+    <button onclick="cerrarSesion()" class="inline-flex items-center space-x-2 py-3 px-6 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold rounded-xl border border-slate-700 transition-all duration-200">
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span>Cerrar Sesión</span>
+    </button>
+  </div>
+
+  <!-- 
+    ========================================================================
+    VALIDACIÓN DE SESIÓN Y DESTRUCCIÓN DE CREDENCIALES
+    ========================================================================
+  -->
+  <script>
+    /**
+     * Mecanismo de control de acceso basado en cliente: Verifica la existencia 
+     * de una sesión activa almacenada en las credenciales locales del navegador.
+     */
+    const activeSession = JSON.parse(localStorage.getItem('active_session'));
+
+    if (!activeSession) {
+      // Si no existe una sesión activa válida, se fuerza la redirección inmediata al login por seguridad
+      window.location.href = 'login.html';
+    } else {
+      // Inyección dinámica del nombre o usuario recuperado en el DOM
+      document.getElementById('userName').innerText = activeSession.nombre || activeSession.usuario;
+    }
+
+    /**
+     * Función que destruye el token o registro de sesión activa y redirige al usuario de retorno al login.
+     */
+    function cerrarSesion() {
+      localStorage.removeItem('active_session');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>
