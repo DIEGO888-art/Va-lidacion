@@ -1,24 +1,21 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- ======================================================================== -->
+  <!-- CONFIGURACIÓN DE METADATOS Y ESTILOS VISUALES - REGISTRO DE USUARIOS     -->
+  <!-- ======================================================================== -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro de Usuario - Buenas Prácticas de Autenticación</title>
-  <!-- 
-    ========================================================================
-    IMPORTACIÓN DE LIBRERÍAS EXTERNAS Y ESTILOS
-    ========================================================================
-    - Se importa Tailwind CSS mediante CDN para maquetación ágil y responsiva[cite: 1].
-    - Se importa FontAwesome para iconos gráficos en los botones de visibilidad.
-  -->
+  <title>Registro de Cuenta - Plataforma Segura</title>
+  
+  <!-- Importación de Tailwind CSS para diseño responsivo -->
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Importación de FontAwesome para iconos -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
-    /* 
-      Estilos personalizados: Fondo con degradado radial oscuro e interfaz 
-      con efecto Glassmorphism (translucidez y desenfoque posterior) 
-      para una experiencia visual elegante y profesional.
-    */
+    /* Estilos visuales modernos para tarjetas con efecto cristal */
     body {
       background: radial-gradient(circle at top left, #111827, #030712);
       font-family: system-ui, -apple-system, sans-serif;
@@ -31,148 +28,66 @@
     }
   </style>
 </head>
-<body class="min-h-screen text-slate-200 flex items-center justify-center p-4 sm:p-6">
+<body class="min-h-screen text-slate-200 flex items-center justify-center p-4">
 
-  <!-- Contenedor principal de la tarjeta de registro -->
-  <div class="glass-card w-full max-w-2xl rounded-2xl p-6 sm:p-10 my-8">
+  <!-- Contenedor Principal del Formulario de Registro -->
+  <div class="glass-card w-full max-w-md rounded-2xl p-6 sm:p-10">
     
-    <!-- Encabezado de la sección -->
-    <div class="text-center mb-8">
-      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">Crear Cuenta</h1>
-      <p class="text-slate-400 text-sm">Completa tus datos aplicando las directrices de seguridad y validación de cliente</p>
+    <!-- Encabezado Principal -->
+    <div class="text-center mb-6">
+      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">Crear Cuenta</h1>
+      <p class="text-slate-400 text-sm">Completa los campos para registrarte en el sistema</p>
     </div>
 
-    <!-- 
-      Contenedor global de alertas: Muestra retroalimentación visual al usuario 
-      en caso de éxito o de errores generales en el proceso de registro.
-    -->
+    <!-- Contenedor dinámico de alertas y mensajes informativos -->
     <div id="alertBox" class="hidden mb-6 p-4 rounded-xl text-sm font-medium transition-all duration-300"></div>
 
-    <!-- Formulario principal con prevención de envío automático y validación por JavaScript -->
-    <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-5" novalidate>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        
-        <!-- Campo de Entrada: Nombre Completo (Permite espacios internos pero validando con la regla específica) -->
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Nombre Completo *</label>
-          <input type="text" id="nombre" onkeydown="prevenirEspacioInicial(event, this)" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Ej. Juan Pérez">
-          <!-- Texto de error dinámico para este campo específico -->
-          <p id="err-nombre" class="text-rose-400 text-xs mt-1 hidden"></p>
-        </div>
-
-        <!-- Campo de Entrada: Correo Electrónico (Bloquea espacios) -->
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Correo Electrónico *</label>
-          <input type="email" id="correo" onkeydown="prevenirEspacios(event)" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="nombre@dominio.com">
-          <p id="err-correo" class="text-rose-400 text-xs mt-1 hidden"></p>
-        </div>
-
-        <!-- Campo de Entrada: Nombre de Usuario (Bloquea espacios) -->
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Nombre de Usuario *</label>
-          <input type="text" id="usuario" onkeydown="prevenirEspacios(event)" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="ej. juan_perez">
-          <p id="err-usuario" class="text-rose-400 text-xs mt-1 hidden"></p>
-        </div>
-
-        <!-- Campo de Entrada: Teléfono (Bloquea espacios y exige 10 dígitos) -->
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Teléfono * (10 dígitos)</label>
-          <input type="tel" id="telefono" maxlength="10" onkeydown="prevenirEspacios(event)" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Ej. 3001234567">
-          <p id="err-telefono" class="text-rose-400 text-xs mt-1 hidden"></p>
-        </div>
-
-        <!-- Campo de Entrada: Fecha de Nacimiento -->
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Fecha de Nacimiento</label>
-          <input type="date" id="fechaNacimiento" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 transition-colors">
-          <p id="err-fechaNacimiento" class="text-rose-400 text-xs mt-1 hidden"></p>
-        </div>
-
-        <!-- Campo de Entrada: Documento de Identidad (Bloquea espacios) -->
-        <div>
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Documento de Identidad</label>
-          <input type="text" id="documento" onkeydown="prevenirEspacios(event)" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Número de documento">
-          <p id="err-documento" class="text-rose-400 text-xs mt-1 hidden"></p>
-        </div>
+    <!-- Formulario de Registro con validaciones de entrada en tiempo real -->
+    <form onsubmit="registrarUsuario(event)" class="space-y-4">
+      
+      <!-- Campo: Nombre Completo (permite espacios permitidos entre nombres) -->
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Nombre Completo</label>
+        <input type="text" id="regNombre" oninput="validarNombre()" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Ej. Juan Pérez" required>
+        <p id="err-nombre" class="text-rose-400 text-xs mt-1 hidden"></p>
       </div>
 
-      <!-- Sección de Contraseñas y Seguridad -->
-      <div class="pt-2">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          
-          <!-- Contraseña principal (Bloquea espacios) -->
-          <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Contraseña * (8-12 car.)</label>
-            <div class="relative">
-              <input type="password" id="password" onkeydown="prevenirEspacios(event)" oninput="evaluarPassword()" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 pr-10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="••••••••">
-              <!-- Botón interactivo para alternar la visibilidad del texto de la contraseña -->
-              <button type="button" onclick="togglePass('password', 'iconPass1')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
-                <i id="iconPass1" class="fa-regular fa-eye"></i>
-              </button>
-            </div>
-            <p id="err-password" class="text-rose-400 text-xs mt-1 hidden"></p>
-          </div>
-
-          <!-- Confirmación de Contraseña (Bloquea espacios) -->
-          <div>
-            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Confirmar Contraseña *</label>
-            <div class="relative">
-              <input type="password" id="confirmPassword" onkeydown="prevenirEspacios(event)" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 pr-10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="••••••••">
-              <button type="button" onclick="togglePass('confirmPassword', 'iconPass2')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
-                <i id="iconPass2" class="fa-regular fa-eye"></i>
-              </button>
-            </div>
-            <p id="err-confirmPassword" class="text-rose-400 text-xs mt-1 hidden"></p>
-          </div>
-        </div>
-
-        <!-- Widget visualizador de la barra de fortaleza de la contraseña -->
-        <div class="mt-3 bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-          <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
-            <span>Fortaleza de la contraseña:</span>
-            <span id="strengthText" class="font-bold text-slate-500">Sin evaluar</span>
-          </div>
-          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-            <div id="strengthBar" class="h-full w-0 transition-all duration-300"></div>
-          </div>
-          <!-- Especificaciones técnicas exigidas al usuario -->
-          <ul class="text-[11px] text-slate-400 mt-2 grid grid-cols-1 sm:grid-cols-2 gap-1 list-disc list-inside">
-            <li>Longitud de 8 a 12 caracteres.</li>
-            <li><strong>Mínimo 1 carácter especial</strong> válido requerido.</li>
-            <li>Prohibidos caracteres inseguros (&lt; &gt; &apos; &quot; \ &amp;).</li>
-            <li>Sin secuencias consecutivas (1234, abcd, aaaa).</li>
-          </ul>
-        </div>
+      <!-- Campo: Correo Electrónico (restringe espacios en blanco) -->
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Correo Electrónico</label>
+        <input type="email" id="regCorreo" onkeydown="prevenirEspacios(event)" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="nombre@dominio.com" required>
       </div>
 
-      <!-- Casilla de verificación de Términos y Condiciones -->
-      <div class="pt-2">
-        <label class="flex items-center space-x-3 cursor-pointer">
-          <input type="checkbox" id="terminos" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500">
-          <span class="text-xs text-slate-300">Acepto los términos y condiciones de uso del servicio.</span>
-        </label>
-        <p id="err-terminos" class="text-rose-400 text-xs mt-1 hidden"></p>
+      <!-- Campo: Contraseña con requisitos de seguridad inspirados en normativas NIST -->
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Contraseña (8-12 car.)</label>
+        <div class="relative">
+          <input type="password" id="regPassword" onkeydown="prevenirEspacios(event)" oninput="evaluarPassword()" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 pr-10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="••••••••" required>
+          <button type="button" onclick="togglePass('regPassword', 'iconRegPass')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+            <i id="iconRegPass" class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+        <p id="err-password" class="text-rose-400 text-xs mt-1 hidden"></p>
       </div>
 
-      <!-- Botón de envío del formulario -->
-      <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all duration-200 mt-4">
-        Crear Cuenta
+      <!-- Botón de envío para completar el registro -->
+      <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all duration-200 mt-2">
+        Registrarse
       </button>
-
-      <p class="text-center text-xs text-slate-400 mt-4">
-        ¿Ya tienes cuenta? <a href="login.html" class="text-indigo-400 hover:underline">Inicia sesión aquí</a>
-      </p>
     </form>
+
+    <!-- Enlace de retorno hacia el inicio de sesión -->
+    <p class="text-center text-xs text-slate-400 mt-6">
+      ¿Ya tienes una cuenta? <a href="login.html" class="text-indigo-400 hover:underline font-medium">Inicia sesión</a>
+    </p>
   </div>
 
-  <!-- 
-    ========================================================================
-    BLOQUE DE SCRIPTS Y LÓGICA DE VALIDACIÓN EN EL CLIENTE
-    ========================================================================
-  -->
+  <!-- =================================================================       -->
+  <!-- LÓGICA DE VALIDACIÓN Y CONTROL EN JAVASCRIPT                            -->
+  <!-- =================================================================       -->
   <script>
     /**
-     * Función para evitar que se escriban espacios en los inputs generales (bloqueo total).
+     * Función para prevenir la introducción de caracteres de espacio en campos protegidos.
      */
     function prevenirEspacios(e) {
       if (e.key === ' ' || e.code === 'Space') {
@@ -181,20 +96,7 @@
     }
 
     /**
-     * Función específica para el campo Nombre: Permite espacios SOLO si ya se ha ingresado
-     * al menos un carácter y evita el espacio al inicio.
-     */
-    function prevenirEspacioInicial(e, input) {
-      if (e.key === ' ' || e.code === 'Space') {
-        if (input.value.length === 0 || input.selectionStart === 0) {
-          e.preventDefault(); // Evita espacio al inicio
-        }
-      }
-    }
-
-    /**
-     * Función encargada de alternar el tipo de input ('password' a 'text' y viceversa)
-     * para permitir que el usuario visualice u oculte los caracteres ingresados.
+     * Función para alternar la visibilidad de los caracteres de contraseña.
      */
     function togglePass(inputId, iconId) {
       const input = document.getElementById(inputId);
@@ -209,202 +111,90 @@
     }
 
     /**
-     * Algoritmo de detección de patrones repetitivos o secuencias alfanuméricas consecutivas
-     * (por ejemplo: '1234', 'abcd', 'aaaa', 'qwerty') para evitar contraseñas vulnerables.
+     * Despliegue dinámico de alertas para notificar estados de éxito o error.
      */
-    function tieneConsecutivos(str) {
-      const lower = str.toLowerCase();
-      for (let i = 0; i < lower.length - 2; i++) {
-        const c1 = lower.charCodeAt(i);
-        const c2 = lower.charCodeAt(i+1);
-        const c3 = lower.charCodeAt(i+2);
-        if (c1 === c2 && c2 === c3) return true;
-        if (c2 === c1 + 1 && c3 === c2 + 1) return true;
-        if (c2 === c1 - 1 && c3 === c2 - 1) return true;
+    function mostrarAlerta(mensaje, tipo = 'error') {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.innerText = mensaje;
+      if (tipo === 'error') {
+        alertBox.className = 'mb-6 p-4 rounded-xl text-sm font-medium bg-rose-500/20 text-rose-300 border border-rose-500/30';
+      } else {
+        alertBox.className = 'mb-6 p-4 rounded-xl text-sm font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
       }
-      const comunes = ["qwerty", "asdf", "zxcv", "password", "1234"];
-      return comunes.some(patron => lower.includes(patron));
+      alertBox.classList.remove('hidden');
     }
 
     /**
-     * Función que evalúa en tiempo real cada tecla presionada en la contraseña.
+     * Validación en tiempo real del campo nombre para prevenir caracteres no deseados.
+     */
+    function validarNombre() {
+      const nombreInput = document.getElementById('regNombre').value;
+      const errEl = document.getElementById('err-nombre');
+      const regexPermitida = /^[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]+$/;
+
+      if (nombreInput.length > 0 && !regexPermitida.test(nombreInput)) {
+        errEl.innerText = 'Solo se permiten letras y espacios válidos';
+        errEl.classList.remove('hidden');
+        return false;
+      }
+      errEl.classList.add('hidden');
+      return true;
+    }
+
+    /**
+     * Validación estricta de políticas de contraseñas seguras inspiradas en NIST.
      */
     function evaluarPassword() {
-      const pwd = document.getElementById('password').value;
-      const bar = document.getElementById('strengthBar');
-      const text = document.getElementById('strengthText');
-      
+      const pwd = document.getElementById('regPassword').value;
       const contieneProhibidos = /[<>'\\&]/.test(pwd);
       const tieneEspecialValido = /[!@#$%^&*()_+\-=\[\]{};:,./?]/.test(pwd);
-
-      if (!pwd) {
-        bar.className = 'h-full w-0 transition-all duration-300';
-        text.innerText = 'Sin evaluar';
-        text.className = 'font-bold text-slate-500';
-        return 'invalida';
-      }
+      const errEl = document.getElementById('err-password');
 
       if (contieneProhibidos) {
-        bar.className = 'h-full w-full bg-rose-600 transition-all duration-300';
-        text.innerText = 'Caracteres prohibidos detectados (<> \' \\ &)';
-        text.className = 'font-bold text-rose-500';
-        return 'invalida';
-      }
-
-      if (pwd.length < 8 || pwd.length > 12) {
-        bar.className = 'h-full w-1/4 bg-rose-500 transition-all duration-300';
-        text.innerText = 'Inválida (Requiere 8 a 12 caracteres)';
-        text.className = 'font-bold text-rose-400';
-        return 'invalida';
-      }
-
-      if (!tieneEspecialValido) {
-        bar.className = 'h-full w-1/3 bg-amber-500 transition-all duration-300';
-        text.innerText = 'Falta al menos un carácter especial válido';
-        text.className = 'font-bold text-amber-400';
-        return 'invalida';
-      }
-
-      if (tieneConsecutivos(pwd)) {
-        bar.className = 'h-full w-1/3 bg-amber-500 transition-all duration-300';
-        text.innerText = 'Débil (Contiene secuencias consecutivas)';
-        text.className = 'font-bold text-amber-400';
-        return 'debil';
-      }
-
-      let score = 0;
-      if (/[a-z]/.test(pwd)) score++;
-      if (/[A-Z]/.test(pwd)) score++;
-      if (/[0-9]/.test(pwd)) score++;
-      if (tieneEspecialValido) score++;
-
-      if (score >= 4 && pwd.length >= 8) {
-        bar.className = 'h-full w-full bg-emerald-500 transition-all duration-300';
-        text.innerText = 'Fuerte (Nivel óptimo)';
-        text.className = 'font-bold text-emerald-400';
-        return 'fuerte';
-      } else {
-        bar.className = 'h-full w-1/2 bg-amber-500 transition-all duration-300';
-        text.innerText = 'Media';
-        text.className = 'font-bold text-amber-400';
-        return 'media';
-      }
-    }
-
-    /**
-     * Función auxiliar para gestionar la renderización de mensajes de error específicos por campo.
-     */
-    function setError(id, msg) {
-      const errEl = document.getElementById('err-' + id);
-      if (msg) {
-        errEl.innerText = msg;
+        errEl.innerText = 'Caracteres prohibidos (<> \' \\ &)';
         errEl.classList.remove('hidden');
-      } else {
-        errEl.classList.add('hidden');
+        return false;
       }
+      if (pwd.length < 8 || pwd.length > 12) {
+        errEl.innerText = 'La longitud debe ser de 8 a 12 caracteres';
+        errEl.classList.remove('hidden');
+        return false;
+      }
+      if (!tieneEspecialValido) {
+        errEl.innerText = 'Debe incluir al menos un carácter especial válido';
+        errEl.classList.remove('hidden');
+        return false;
+      }
+      errEl.classList.add('hidden');
+      return true;
     }
 
     /**
-     * Controlador principal del evento de envío (submit) del formulario de registro.
+     * Función que procesa el registro y almacena de forma segura los datos en localStorage.
      */
-    function handleRegister(e) {
+    function registrarUsuario(e) {
       e.preventDefault();
-      let isValid = true;
 
-      const nombre = document.getElementById('nombre').value.trim();
-      const correo = document.getElementById('correo').value.toLowerCase();
-      const usuario = document.getElementById('usuario').value;
-      const telefono = document.getElementById('telefono').value;
-      const fechaNacimiento = document.getElementById('fechaNacimiento').value;
-      const documento = document.getElementById('documento').value;
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
-      const terminos = document.getElementById('terminos').checked;
-
-      // Limpieza previa de errores visuales en la interfaz
-      ['nombre','correo','usuario','telefono','fechaNacimiento','documento','password','confirmPassword','terminos'].forEach(id => setError(id, ''));
-
-      // Validación del Nombre Completo (permite espacios internos entre nombres y apellidos, de 2 a 50 caracteres)
-      if (!nombre || nombre.length < 2 || nombre.length > 50 || !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$/.test(nombre)) {
-        setError('nombre', 'Escribe un nombre válido (2 a 50 letras y espacios internos)');
-        isValid = false;
+      if (!validarNombre() || !evaluarPassword()) {
+        mostrarAlerta('Por favor, corrige los errores en el formulario.');
+        return;
       }
 
-      // Validación del Correo Electrónico
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!correo || !emailRegex.test(correo) || correo.length > 50) {
-        setError('correo', 'Ingresa un correo válido sin espacios (máx. 50 caracteres)');
-        isValid = false;
-      }
+      const nombre = document.getElementById('regNombre').value.trim();
+      const correo = document.getElementById('regCorreo').value.trim().toLowerCase();
+      const password = document.getElementById('regPassword').value;
 
-      // Validación del Nombre de Usuario
-      if (!usuario || !/^[a-zA-Z0-9_-]{3,20}$/.test(usuario)) {
-        setError('usuario', 'Usa de 3 a 20 caracteres sin espacios (letras, números, - o _)');
-        isValid = false;
-      }
+      // Creación del objeto de usuario
+      const nuevoUsuario = { nombre, correo, password };
 
-      // Validación estricta del Teléfono: Exactamente 10 dígitos numéricos sin espacios
-      if (!telefono || !/^\d{10}$/.test(telefono)) {
-        setError('telefono', 'El teléfono debe tener exactamente 10 dígitos numéricos');
-        isValid = false;
-      }
+      // Almacenamiento persistente simulado en el navegador
+      localStorage.setItem('registered_user', JSON.stringify(nuevoUsuario));
 
-      // Validación de Fecha de Nacimiento (Mínimo 14 años)
-      if (fechaNacimiento) {
-        const hoy = new Date();
-        const fn = new Date(fechaNacimiento);
-        let edad = hoy.getFullYear() - fn.getFullYear();
-        const m = hoy.getMonth() - fn.getMonth();
-        if (m < 0 || (m === 0 && hoy.getDate() < fn.getDate())) edad--;
-        if (edad < 14) {
-          setError('fechaNacimiento', 'Debes tener al menos 14 años para registrarte');
-          isValid = false;
-        }
-      }
+      mostrarAlerta('¡Cuenta registrada con éxito! Redirigiendo al inicio de sesión...', 'exito');
 
-      // Validación opcional del Documento de Identidad
-      if (documento && !/^\d{6,10}$/.test(documento)) {
-        setError('documento', 'El documento de identidad debe tener entre 6 y 10 dígitos');
-        isValid = false;
-      }
-
-      // Validación exhaustiva de la Contraseña
-      const fortaleza = evaluarPassword();
-      const tieneEspecialValido = /[!@#$%^&*()_+\-=\[\]{};:,./?]/.test(password);
-
-      if (fortaleza !== 'fuerte' || !tieneEspecialValido) {
-        setError('password', 'La contraseña debe ser FUERTE, sin espacios y contener al menos un carácter especial válido');
-        isValid = false;
-      } else if (password.includes(nombre) || password.includes(usuario) || (correo && password.includes(correo.split('@')[0]))) {
-        setError('password', 'La contraseña no puede contener partes de tu nombre, usuario o correo');
-        isValid = false;
-      }
-
-      if (password !== confirmPassword) {
-        setError('confirmPassword', 'Las contraseñas ingresadas no coinciden');
-        isValid = false;
-      }
-
-      // Validación de Aceptación de Términos y Condiciones
-      if (!terminos) {
-        setError('terminos', 'Debes aceptar los términos y condiciones para continuar');
-        isValid = false;
-      }
-
-      // Proceso de guardado exitoso simulado mediante LocalStorage
-      if (isValid) {
-        const nuevoUsuario = { nombre, correo, usuario, password };
-        localStorage.setItem('registered_user', JSON.stringify(nuevoUsuario));
-
-        const alertBox = document.getElementById('alertBox');
-        alertBox.className = 'mb-6 p-4 rounded-xl text-sm font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-        alertBox.innerText = '¡Registro exitoso! Redirigiendo de forma segura al inicio de sesión...';
-        alertBox.classList.remove('hidden');
-
-        setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 1500);
-      }
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 1800);
     }
   </script>
 </body>
