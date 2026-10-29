@@ -1,21 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <!-- ======================================================================== -->
-  <!-- CONFIGURACIÓN DE METADATOS Y ESTILOS VISUALES - INICIO DE SESIÓN         -->
-  <!-- ======================================================================== -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iniciar Sesión - Plataforma Segura</title>
-  
-  <!-- Importación de Tailwind CSS para un diseño responsivo y moderno -->
+  <title>Iniciar Sesión - Autenticación Segura</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Importación de FontAwesome para iconos de interfaz de usuario -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
   <style>
-    /* Estilos personalizados para efectos visuales tipo Glassmorphism */
     body {
       background: radial-gradient(circle at top left, #111827, #030712);
       font-family: system-ui, -apple-system, sans-serif;
@@ -30,74 +21,49 @@
 </head>
 <body class="min-h-screen text-slate-200 flex items-center justify-center p-4">
 
-  <!-- Contenedor Principal de la Tarjeta de Inicio de Sesión -->
   <div class="glass-card w-full max-w-md rounded-2xl p-6 sm:p-10">
-    
-    <!-- Encabezado de la Interfaz -->
     <div class="text-center mb-8">
-      <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">Iniciar Sesión</h1>
-      <p class="text-slate-400 text-sm">Ingresa tus credenciales para acceder al sistema</p>
+      <h1 class="text-3xl font-extrabold tracking-tight text-white mb-2">Bienvenido</h1>
+      <p class="text-slate-400 text-sm">Ingresa tus credenciales para acceder a la plataforma</p>
     </div>
 
-    <!-- Caja contenedora para notificaciones y alertas dinámicas (errores / éxitos) -->
     <div id="alertBox" class="hidden mb-6 p-4 rounded-xl text-sm font-medium transition-all duration-300"></div>
 
-    <!-- Formulario Principal de Autenticación de Usuarios -->
-    <form onsubmit="iniciarSesion(event)" class="space-y-5">
+    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5" novalidate>
       
-      <!-- Campo de Entrada: Correo Electrónico -->
       <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Correo Electrónico</label>
-        <input type="email" id="loginCorreo" onkeydown="prevenirEspacios(event)" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="nombre@dominio.com" required>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">Correo Electrónico o Usuario</label>
+        <input type="text" id="identifier" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="correo@dominio.com">
       </div>
 
-      <!-- Campo de Entrada: Contraseña con opción de visualización -->
       <div>
-        <div class="flex items-center justify-between mb-1">
+        <div class="flex justify-between items-center mb-1">
           <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">Contraseña</label>
-          <!-- Enlace hacia el flujo de recuperación de credenciales -->
-          <a href="recuperar.html" class="text-xs text-indigo-400 hover:underline">¿Olvidaste tu contraseña?</a>
+          <!-- Redirige a la interfaz de recuperación de contraseña -->
+          <button type="button" onclick="irARecuperar()" class="text-xs text-indigo-400 hover:underline">¿Olvidaste tu contraseña?</button>
         </div>
         <div class="relative">
-          <input type="password" id="loginPassword" onkeydown="prevenirEspacios(event)" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 pr-10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="••••••••" required>
-          <!-- Botón interactivo para alternar la visibilidad del texto de la contraseña -->
-          <button type="button" onclick="togglePass('loginPassword', 'iconLoginPass')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
-            <i id="iconLoginPass" class="fa-regular fa-eye"></i>
+          <input type="password" id="password" class="w-full bg-slate-900/80 border border-slate-700/80 rounded-xl px-4 py-2.5 pr-10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="••••••••">
+          <button type="button" onclick="togglePass('password', 'iconPass')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+            <i id="iconPass" class="fa-regular fa-eye"></i>
           </button>
         </div>
       </div>
 
-      <!-- Botón de Envío del Formulario de Acceso -->
-      <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all duration-200">
-        Entrar al Sistema
+      <button id="btnLogin" type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all duration-200 mt-2">
+        Iniciar Sesión
       </button>
-    </form>
 
-    <!-- Enlace de redirección hacia el módulo de Registro de Nuevos Usuarios -->
-    <p class="text-center text-xs text-slate-400 mt-6">
-      ¿No tienes una cuenta? <a href="registro.html" class="text-indigo-400 hover:underline font-medium">Regístrate aquí</a>
-    </p>
+      <p class="text-center text-xs text-slate-400 mt-6">
+        ¿No tienes una cuenta? <a href="registro.html" class="text-indigo-400 hover:underline">Regístrate aquí</a>
+      </p>
+    </form>
   </div>
 
-  <!-- =================================================================       -->
-  <!-- LÓGICA DE PROGRAMACIÓN EN JAVASCRIPT (CLIENTE)                          -->
-  <!-- =================================================================       -->
   <script>
-    /**
-     * Función de seguridad para prevenir la inserción de espacios en blanco mediante teclado.
-     * @param {KeyboardEvent} e - Evento de pulsación de tecla.
-     */
-    function prevenirEspacios(e) {
-      if (e.key === ' ' || e.code === 'Space') {
-        e.preventDefault();
-      }
-    }
+    let intentosFallidos = 0;
+    let tiempoBloqueo = null;
 
-    /**
-     * Función para alternar la visibilidad de los caracteres en un campo de contraseña.
-     * @param {string} inputId - Identificador del elemento input.
-     * @param {string} iconId - Identificador del icono visual asociado.
-     */
     function togglePass(inputId, iconId) {
       const input = document.getElementById(inputId);
       const icon = document.getElementById(iconId);
@@ -110,11 +76,6 @@
       }
     }
 
-    /**
-     * Función centralizada para mostrar mensajes de alerta visuales y estilizados al usuario.
-     * @param {string} mensaje - Texto descriptivo de la alerta.
-     * @param {string} tipo - Clasificación del mensaje ('error' o 'exito').
-     */
     function mostrarAlerta(mensaje, tipo = 'error') {
       const alertBox = document.getElementById('alertBox');
       alertBox.innerText = mensaje;
@@ -126,32 +87,46 @@
       alertBox.classList.remove('hidden');
     }
 
-    /**
-     * Función principal que procesa la autenticación del usuario validando contra localStorage.
-     * @param {Event} e - Evento de envío del formulario.
-     */
-    function iniciarSesion(e) {
+    function handleLogin(e) {
       e.preventDefault();
-      
-      // Captura y normalización de las credenciales ingresadas por el usuario
-      const correoIngresado = document.getElementById('loginCorreo').value.trim().toLowerCase();
-      const passwordIngresado = document.getElementById('loginPassword').value;
 
-      // Recuperación de la base de datos simulada en el almacenamiento local del navegador
+      if (tiempoBloqueo && Date.now() < tiempoBloqueo) {
+        const segundosRestantes = Math.ceil((tiempoBloqueo - Date.now()) / 1000);
+        mostrarAlerta(`Demasiados intentos fallidos. Por seguridad, espera ${segundosRestantes} segundos.`);
+        return;
+      }
+
+      const identifier = document.getElementById('identifier').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+
+      if (!identifier || !password) {
+        mostrarAlerta('Por favor completa todos los campos obligatorios.');
+        return;
+      }
+
       const storedUser = JSON.parse(localStorage.getItem('registered_user'));
 
-      // Validación estricta de la existencia del usuario y coincidencia de credenciales
-      if (storedUser && storedUser.correo === correoIngresado && storedUser.password === passwordIngresado) {
-        mostrarAlerta('¡Inicio de sesión exitoso! Redirigiendo al panel...', 'exito');
-        
-        // Simulación de persistencia de sesión activa y redirección controlada
+      if (storedUser && (identifier === storedUser.correo || identifier === storedUser.usuario) && password === storedUser.password) {
+        intentosFallidos = 0;
+        localStorage.setItem('active_session', JSON.stringify(storedUser));
+        mostrarAlerta('Inicio de sesión correcto. Redirigiendo...', 'exito');
         setTimeout(() => {
-          window.location.href = 'dashboard.html';
-        }, 1500);
+          window.location.href = 'bienvenida.html';
+        }, 1000);
       } else {
-        // Mensaje genérico de seguridad por normativas de protección de datos
-        mostrarAlerta('Correo o contraseña incorrectos. Verifica tus datos.');
+        intentosFallidos++;
+        if (intentosFallidos >= 5) {
+          tiempoBloqueo = Date.now() + 60000;
+          mostrarAlerta('Has superado el límite de intentos permitidos. Acceso bloqueado temporalmente por 1 minuto.');
+          intentosFallidos = 0;
+        } else {
+          mostrarAlerta('Correo o contraseña incorrectos.');
+        }
       }
+    }
+
+    function irARecuperar() {
+      window.location.href = 'recuperar.html';
     }
   </script>
 </body>

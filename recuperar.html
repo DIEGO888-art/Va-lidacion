@@ -1,30 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <!-- ======================================================================== -->
-  <!-- CONFIGURACIÓN DE METADATOS Y LIBRERÍA EMAILJS PARA CORREOS REALES        -->
-  <!-- ======================================================================== -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Recuperar Contraseña - Correo Real</title>
-  
-  <!-- Importación de Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Importación de iconos FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- SDK oficial de EmailJS para envío directo de correos desde el navegador -->
+  <!-- SDK oficial de EmailJS para enviar correos desde el navegador -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script type="text/javascript">
     (function() {
-      // INICIALIZACIÓN DE SEGURIDAD: Conecta la aplicación con tu cuenta de EmailJS
-      emailjs.init("TU_PUBLIC_KEY"); // <--- Recuerda colocar tu Public Key aquí
+      // Inicializa EmailJS con tu Public Key
+      emailjs.init("GMNH-Sq2fhlD6G3-9"); // <--- PEGA AQUÍ TU PUBLIC KEY DE EMAILJS
     })();
   </script>
-  
   <style>
-    /* Estilos estéticos de diseño moderno */
     body {
       background: radial-gradient(circle at top left, #111827, #030712);
       font-family: system-ui, -apple-system, sans-serif;
@@ -39,19 +29,15 @@
 </head>
 <body class="min-h-screen text-slate-200 flex items-center justify-center p-4">
 
-  <!-- Contenedor Principal del Flujo de Recuperación -->
   <div class="glass-card w-full max-w-md rounded-2xl p-6 sm:p-10">
-    
-    <!-- Encabezado Dinámico -->
     <div class="text-center mb-8">
       <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">Recuperar Contraseña</h1>
       <p id="subTitle" class="text-slate-400 text-sm">Ingresa tu correo para recibir el código de verificación real</p>
     </div>
 
-    <!-- Caja de alertas para retroalimentación del sistema -->
     <div id="alertBox" class="hidden mb-6 p-4 rounded-xl text-sm font-medium transition-all duration-300"></div>
 
-    <!-- PASO 1: Solicitud del correo electrónico -->
+    <!-- PASO 1: Solicitar Correo -->
     <div id="step1Container">
       <form onsubmit="enviarCorreoReal(event)" class="space-y-5">
         <div>
@@ -65,7 +51,7 @@
       </form>
     </div>
 
-    <!-- PASO 2: Ingreso y validación del código de 6 dígitos -->
+    <!-- PASO 2: Ingresar Código de 6 Dígitos -->
     <div id="step2Container" class="hidden">
       <form onsubmit="verificarCodigo(event)" class="space-y-5">
         <div>
@@ -80,7 +66,7 @@
       </form>
     </div>
 
-    <!-- PASO 3: Restablecimiento de contraseña segura -->
+    <!-- PASO 3: Cambiar Contraseña -->
     <div id="step3Container" class="hidden">
       <form onsubmit="cambiarPassword(event)" class="space-y-5">
         <div>
@@ -111,28 +97,18 @@
       </form>
     </div>
 
-    <!-- Enlace de regreso al login -->
     <p class="text-center text-xs text-slate-400 mt-6">
       <a href="login.html" class="text-indigo-400 hover:underline"><i class="fa-solid fa-arrow-left mr-1"></i> Volver al inicio de sesión</a>
     </p>
   </div>
 
-  <!-- =================================================================       -->
-  <!-- LÓGICA DE RECUPERACIÓN Y ENVÍO DE CORREOS REALES EN JAVASCRIPT          -->
-  <!-- =================================================================       -->
   <script>
-    /**
-     * Prevención de espacios en blanco mediante eventos de teclado.
-     */
     function prevenirEspacios(e) {
       if (e.key === ' ' || e.code === 'Space') {
         e.preventDefault();
       }
     }
 
-    /**
-     * Alternar visibilidad de campos de contraseña.
-     */
     function togglePass(inputId, iconId) {
       const input = document.getElementById(inputId);
       const icon = document.getElementById(iconId);
@@ -145,9 +121,6 @@
       }
     }
 
-    /**
-     * Despliegue dinámico de notificaciones visuales estilizadas.
-     */
     function mostrarAlerta(mensaje, tipo = 'error') {
       const alertBox = document.getElementById('alertBox');
       alertBox.innerText = mensaje;
@@ -159,16 +132,14 @@
       alertBox.classList.remove('hidden');
     }
 
-    /**
-     * Función encargada de generar el código de verificación y despacharlo al correo real del usuario.
-     */
+    // ENVIAR EL CORREO REAL USANDO EMAILJS (Sin Node.js)
     function enviarCorreoReal(e) {
       e.preventDefault();
       const correoInput = document.getElementById('recCorreo').value.trim().toLowerCase();
       const storedUser = JSON.parse(localStorage.getItem('registered_user'));
 
       if (!storedUser || storedUser.correo !== correoInput) {
-        // Implementación de principio de seguridad NIST (mensaje genérico)
+        // Por seguridad NIST, mostramos el mismo mensaje genérico aunque el correo no exista
         mostrarAlerta('Si el correo está registrado, recibirás un código de verificación.', 'exito');
         setTimeout(() => {
           document.getElementById('step1Container').classList.add('hidden');
@@ -179,13 +150,13 @@
         return;
       }
 
-      // Generación aleatoria de código criptográfico de 6 dígitos
+      // Generar código de 6 dígitos
       const codigoAleatorio = Math.floor(100000 + Math.random() * 900000).toString();
       
       const datosRecuperacion = {
         correo: storedUser.correo,
         codigo: codigoAleatorio,
-        expira: Date.now() + (30 * 60 * 1000) // Vigencia temporal de 30 minutos
+        expira: Date.now() + (30 * 60 * 1000)
       };
       localStorage.setItem('reset_data', JSON.stringify(datosRecuperacion));
 
@@ -193,14 +164,14 @@
       btn.innerText = 'Enviando correo real...';
       btn.disabled = true;
 
-      // Estructuración de parámetros dinámicos inyectados en la plantilla de EmailJS
+      // Parámetros que se inyectan en tu plantilla de EmailJS
       const templateParams = {
         to_email: correoInput,
         codigo: codigoAleatorio
       };
 
-      // Disparo de la solicitud asíncrona hacia el servicio externo de EmailJS
-      emailjs.send('TU_SERVICE_ID', 'TU_TEMPLATE_ID', templateParams)
+      // Llamada directa a EmailJS desde el navegador
+      emailjs.send('service_nw0e32v', 'template_of25h6b', templateParams)
         .then(function(response) {
             mostrarAlerta('¡Correo enviado con éxito! Revisa tu bandeja de entrada real.', 'exito');
             setTimeout(() => {
@@ -217,9 +188,6 @@
         });
     }
 
-    /**
-     * Verificación del código de 6 dígitos ingresado por el usuario frente al almacenado.
-     */
     function verificarCodigo(e) {
       e.preventDefault();
       const ingreso = document.getElementById('codigoIngresado').value.trim();
@@ -240,9 +208,6 @@
       }
     }
 
-    /**
-     * Validación de requisitos complejos para la nueva contraseña.
-     */
     function evaluarPassword() {
       const pwd = document.getElementById('nuevoPassword').value;
       const contieneProhibidos = /[<>'\\&]/.test(pwd);
@@ -268,9 +233,6 @@
       return true;
     }
 
-    /**
-     * Guardado final de la nueva contraseña en el almacenamiento local.
-     */
     function cambiarPassword(e) {
       e.preventDefault();
       const nuevoPassword = document.getElementById('nuevoPassword').value;
